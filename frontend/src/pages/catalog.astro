@@ -20,7 +20,7 @@ let query = supabase
 if (q) query = query.or(`title.ilike.%${q}%,author.ilike.%${q}%`);
 if (genre) query = query.eq('genre', genre);
 if (category) query = query.eq('category', category);
-if (offers === '1') query = query.lte('price', 15);
+if (offers === '1') query = query.lte('price', 15000);
 
 if (sort === 'new') query = query.order('release_year', { ascending: false });
 else if (sort === 'price-asc') query = query.order('price', { ascending: true });
@@ -118,7 +118,7 @@ const sorts = [
         <div>
           <label class="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" name="offers" value="1" checked={offers === '1'} class="accent-[color:var(--color-ink)]" />
-            <span class="mono text-[11px] uppercase tracking-[0.14em]">Solo ofertas ≤ 15 €</span>
+            <span class="mono text-[11px] uppercase tracking-[0.14em]">Solo económicos ≤ $15.000</span>
           </label>
         </div>
 
