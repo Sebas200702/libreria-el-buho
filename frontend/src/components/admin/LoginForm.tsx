@@ -37,7 +37,7 @@ export default function LoginForm({ next = '/admin' }: Props) {
           className="input"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="admin@buhobooks.co"
+          placeholder="tu@email.com"
           data-testid="login-email"
         />
       </div>
