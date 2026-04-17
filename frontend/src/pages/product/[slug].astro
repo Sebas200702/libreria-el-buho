@@ -6,6 +6,8 @@ import { getServerSupabase } from '../../lib/supabase/server';
 import { formatPrice, coverUrl } from '../../lib/utils/format';
 
 const { slug } = Astro.params;
+const whatsapp = import.meta.env.PUBLIC_WHATSAPP_NUMBER;
+const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? '';
 const supabase = getServerSupabase({ request: Astro.request, cookies: Astro.cookies });
 
 const { data: book } = await supabase
@@ -30,6 +32,9 @@ const { data: related } = await supabase
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const cover = coverUrl(book.cover_image_path, supabaseUrl);
 const available = Math.max(0, (book.stock ?? 0) - (book.reserved_stock ?? 0));
+
+const waMessage = `Hola 🦉 Librería del Búho\n\nMe interesa este libro:\n• ${book.title} — ${book.author}\n• Precio: ${formatPrice(book.price)}\n• Enlace: ${siteUrl}/product/${book.slug}\n\n¿Está disponible?`;
+const waUrl = `https://wa.me/${whatsapp}?text=${encodeURIComponent(waMessage)}`;
 ---
 
 <BaseLayout title={`${book.title} — ${book.author}`} description={book.description ?? undefined}>
@@ -102,6 +107,18 @@ const available = Math.max(0, (book.stock ?? 0) - (book.reserved_stock ?? 0));
               }}
             />
           </div>
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener"
+            class="btn btn-ghost inline-flex items-center gap-2"
+            data-testid="product-whatsapp"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-[color:var(--color-success)]">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606"/>
+            </svg>
+            Preguntar por WhatsApp
+          </a>
           <a href="/cart" class="btn btn-ghost">Ir al carrito →</a>
         </div>
 

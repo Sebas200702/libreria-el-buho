@@ -1,14 +1,15 @@
 export function formatPrice(amount: number): string {
-  return new Intl.NumberFormat('es-ES', {
+  return new Intl.NumberFormat('es-CO', {
     style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 2,
+    currency: 'COP',
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   }).format(amount);
 }
 
 export function formatDate(input: string | Date): string {
   const d = typeof input === 'string' ? new Date(input) : input;
-  return new Intl.DateTimeFormat('es-ES', {
+  return new Intl.DateTimeFormat('es-CO', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -16,7 +17,7 @@ export function formatDate(input: string | Date): string {
 }
 
 export function formatNumber(n: number): string {
-  return new Intl.NumberFormat('es-ES').format(n);
+  return new Intl.NumberFormat('es-CO').format(n);
 }
 
 export function coverUrl(

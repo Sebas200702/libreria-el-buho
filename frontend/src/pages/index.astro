@@ -2,36 +2,47 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductSlider from '../components/shop/ProductSlider.astro';
 import ProductCard from '../components/shop/ProductCard.astro';
-import NewsletterForm from '../components/shop/NewsletterForm.tsx';
 import { getServerSupabase } from '../lib/supabase/server';
+import { formatPrice } from '../lib/utils/format';
 
 const supabase = getServerSupabase({ request: Astro.request, cookies: Astro.cookies });
+const whatsapp = import.meta.env.PUBLIC_WHATSAPP_NUMBER;
+const instagramUrl = import.meta.env.PUBLIC_INSTAGRAM_URL;
+const instagramHandle = import.meta.env.PUBLIC_INSTAGRAM_HANDLE;
+const logoUrl = import.meta.env.PUBLIC_LOGO_URL;
 
 const { data: featured } = await supabase
   .from('books')
   .select('id, slug, title, author, price, stock, genre, release_year, cover_image_path')
   .eq('published', true)
   .order('created_at', { ascending: false })
-  .limit(6);
+  .limit(8);
 
 const { data: novelties } = await supabase
   .from('books')
   .select('id, slug, title, author, price, stock, genre, release_year, cover_image_path')
   .eq('published', true)
-  .order('release_year', { ascending: false })
-  .limit(12);
+  .order('created_at', { ascending: false })
+  .range(8, 24);
 
-const { data: offers } = await supabase
+const { data: economics } = await supabase
   .from('books')
   .select('id, slug, title, author, price, stock, genre, release_year, cover_image_path')
   .eq('published', true)
-  .lte('price', 15)
+  .lte('price', 15000)
   .order('price', { ascending: true })
-  .limit(6);
+  .limit(8);
+
+const { data: colombianos } = await supabase
+  .from('books')
+  .select('id, slug, title, author, price, stock, genre, release_year, cover_image_path')
+  .eq('published', true)
+  .eq('genre', 'Literatura colombiana')
+  .limit(8);
 
 const { data: genresRaw } = await supabase
   .from('books')
-  .select('genre')
+  .select('genre, price')
   .eq('published', true)
   .not('genre', 'is', null);
 
@@ -41,68 +52,133 @@ const genreCounts = new Map<string, number>();
   if (!g) return;
   genreCounts.set(g, (genreCounts.get(g) ?? 0) + 1);
 });
-const genres = [...genreCounts.entries()].slice(0, 8);
+const genres = [...genreCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
 const totalBooks = (genresRaw ?? []).length;
+const minPrice = Math.min(...(genresRaw ?? []).map((r) => Number((r as { price: number }).price)));
+const maxPrice = Math.max(...(genresRaw ?? []).map((r) => Number((r as { price: number }).price)));
 ---
 
 <BaseLayout
-  title="Librería del Búho — Editorial independiente"
-  description="Libros seleccionados con rigor. Editorial y distribución independiente."
+  title="Librería del Búho — Clásicos en Barranquilla por WhatsApp"
+  description="Una librería pequeña con muchos clásicos. Literatura, filosofía y libros colombianos. Pedidos por WhatsApp, entregas en Barranquilla y alrededores."
 >
-  <!-- HERO -->
+  <!-- HERO — humilde, real -->
   <section class="relative border-b border-[color:var(--color-line)] overflow-hidden" data-testid="hero">
-    <div class="absolute inset-0 grid-lines opacity-60 pointer-events-none"></div>
-    <div class="relative mx-auto max-w-[1440px] px-6 pt-16 pb-20 md:pt-24 md:pb-28">
-      <div class="flex items-center gap-3 mb-8 fade-up">
-        <span class="chip" data-testid="hero-chip">
-          <span class="inline-block w-1.5 h-1.5 rounded-full bg-[color:var(--color-success)]"></span>
-          Ed. 01 — Invierno 2026
-        </span>
-        <span class="mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">
-          Catálogo vivo · {totalBooks} títulos
-        </span>
+    <div class="absolute inset-0 grid-lines opacity-40 pointer-events-none"></div>
+
+    <div class="relative mx-auto max-w-[1440px] px-6 pt-14 pb-14 md:pt-20 md:pb-20">
+      <div class="grid grid-cols-12 gap-8 items-center">
+        <div class="col-span-12 md:col-span-7">
+          <div class="flex items-center gap-3 mb-7 flex-wrap fade-up">
+            <span class="chip" data-testid="hero-chip">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-[color:var(--color-success)]"></span>
+              Barranquilla · Colombia
+            </span>
+            <span class="chip">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606"/></svg>
+              Pedidos por WhatsApp
+            </span>
+            <span class="mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">
+              {totalBooks} títulos disponibles
+            </span>
+          </div>
+
+          <h1
+            class="fade-up text-[40px] md:text-[72px] leading-[0.98] tracking-[-0.03em]"
+            style="animation-delay: 80ms"
+          >
+            Una librería pequeña<br />
+            <span class="text-[color:var(--color-muted)]">con muchos</span><br />
+            clásicos.
+          </h1>
+
+          <p
+            class="fade-up mt-7 max-w-xl text-[15px] md:text-[16px] leading-[1.6] text-[color:var(--color-muted)]"
+            style="animation-delay: 160ms"
+          >
+            Literatura universal, filosofía y libros colombianos, a precios
+            honestos. Mira el catálogo, arma tu pedido y lo cerramos por WhatsApp.
+            Entregas en Barranquilla y alrededores.
+          </p>
+
+          <div class="fade-up mt-8 flex flex-wrap items-center gap-3" style="animation-delay: 240ms">
+            <a href="/catalog" class="btn btn-primary" data-testid="hero-cta-primary">
+              Ver catálogo
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14" /><path d="M13 5l7 7-7 7" />
+              </svg>
+            </a>
+            <a
+              href={`https://wa.me/${whatsapp}?text=${encodeURIComponent('Hola 🦉, vi la web de la Librería del Búho y quiero preguntar por algunos libros.')}`}
+              target="_blank"
+              rel="noopener"
+              class="btn btn-ghost inline-flex items-center gap-2"
+              data-testid="hero-cta-wa"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-[color:var(--color-success)]">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606"/>
+              </svg>
+              Escribir por WhatsApp
+            </a>
+          </div>
+
+          <!-- Real facts, no invented bullshit -->
+          <div class="fade-up grid grid-cols-3 gap-3 mt-12 max-w-xl" style="animation-delay: 320ms">
+            <div class="border-l border-[color:var(--color-line-2)] pl-3">
+              <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">Títulos</div>
+              <div class="mono text-[22px] md:text-[26px] tabular-nums mt-1">{totalBooks}</div>
+            </div>
+            <div class="border-l border-[color:var(--color-line-2)] pl-3">
+              <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">Desde</div>
+              <div class="mono text-[22px] md:text-[26px] tabular-nums mt-1">{formatPrice(minPrice)}</div>
+            </div>
+            <div class="border-l border-[color:var(--color-line-2)] pl-3">
+              <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">Hasta</div>
+              <div class="mono text-[22px] md:text-[26px] tabular-nums mt-1">{formatPrice(maxPrice)}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOGO MASCOT -->
+        <div class="col-span-12 md:col-span-5 fade-up" style="animation-delay: 120ms">
+          <div class="relative mx-auto max-w-[380px]">
+            <div class="absolute -inset-4 border border-dashed border-[color:var(--color-line-2)] rounded-full -z-10"></div>
+            <div class="absolute -inset-10 border border-dashed border-[color:var(--color-line-2)] rounded-full -z-10 opacity-60"></div>
+            <div class="aspect-square rounded-full border-2 border-[color:var(--color-ink)] bg-white overflow-hidden relative">
+              <img
+                src={logoUrl}
+                alt="Mascota Librería del Búho"
+                class="absolute inset-0 w-full h-full object-contain p-2"
+                loading="eager"
+              />
+            </div>
+            <!-- floating annotations -->
+            <div class="absolute -top-2 -right-6 rotate-3 chip bg-[color:var(--color-paper-2)]">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-[color:var(--color-signal)]"></span>
+              Abierto en línea
+            </div>
+            <div class="absolute -bottom-3 -left-4 -rotate-2 chip bg-[color:var(--color-paper-2)]">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="10" r="3" />
+                <path d="M12 2a8 8 0 0 0-8 8c0 4.5 8 12 8 12s8-7.5 8-12a8 8 0 0 0-8-8z" />
+              </svg>
+              Barranquilla
+            </div>
+          </div>
+        </div>
       </div>
 
-      <h1
-        class="fade-up text-[44px] md:text-[88px] leading-[0.95] tracking-[-0.03em] max-w-5xl"
-        style="animation-delay: 80ms"
-      >
-        Una librería<br />
-        <span class="text-[color:var(--color-muted)]">con índice,</span><br />
-        colofón y criterio.
-      </h1>
-
-      <p
-        class="fade-up mt-8 max-w-xl text-[16px] leading-[1.55] text-[color:var(--color-muted)]"
-        style="animation-delay: 160ms"
-      >
-        Seleccionamos lecturas esenciales: ficción contemporánea, ensayo, poesía y técnica.
-        Editamos con respeto por el papel y enviamos con precisión de relojería.
-      </p>
-
-      <div class="fade-up mt-10 flex flex-wrap items-center gap-3" style="animation-delay: 240ms">
-        <a href="/catalog" class="btn btn-primary" data-testid="hero-cta-primary">
-          Explorar catálogo
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14" /><path d="M13 5l7 7-7 7" />
-          </svg>
-        </a>
-        <a href="/catalog?sort=new" class="btn btn-ghost" data-testid="hero-cta-secondary">
-          Ver novedades
-        </a>
-      </div>
-
-      <!-- marquee ticker -->
-      <div class="fade-up mt-16 overflow-hidden border-y border-[color:var(--color-line)] py-3" style="animation-delay: 320ms">
+      <!-- Ticker honesto -->
+      <div class="fade-up mt-16 overflow-hidden border-y border-[color:var(--color-line)] py-3" style="animation-delay: 360ms">
         <div class="marquee-track flex whitespace-nowrap gap-10 mono text-[12px] uppercase tracking-[0.18em] text-[color:var(--color-muted)]">
           {
             Array.from({ length: 2 }).flatMap((_, r) => [
-              <span>◇ Envío en 48h península</span>,
-              <span>◇ Papel FSC certificado</span>,
-              <span>◇ Packaging libre de plástico</span>,
-              <span>◇ {totalBooks} títulos activos</span>,
-              <span>◇ Descuento 10% con newsletter</span>,
-              <span>◇ Edición independiente</span>,
+              <span>◇ Entrega en Barranquilla y alrededores</span>,
+              <span>◇ Transferencia · Nequi · Daviplata</span>,
+              <span>◇ {totalBooks} clásicos en catálogo</span>,
+              <span>◇ Pedidos por WhatsApp</span>,
+              <span>◇ Libros desde {formatPrice(minPrice)}</span>,
+              <span>◇ Literatura colombiana, filosofía, teatro</span>,
             ])
           }
         </div>
@@ -110,54 +186,64 @@ const totalBooks = (genresRaw ?? []).length;
     </div>
   </section>
 
-  <!-- FEATURED GRID -->
+  <!-- DESTACADOS -->
   <section class="mx-auto max-w-[1440px] px-6 py-16" data-testid="featured">
-    <div class="flex items-end justify-between mb-8">
+    <div class="flex items-end justify-between mb-8 gap-4 flex-wrap">
       <div>
         <div class="label mb-2">§01 — Destacados</div>
-        <h2 class="text-[32px] md:text-[42px] tracking-tight">Selección editorial</h2>
+        <h2 class="text-[32px] md:text-[42px] tracking-tight">Para empezar</h2>
       </div>
-      <a href="/catalog" class="btn btn-ghost">Ver catálogo completo</a>
+      <a href="/catalog" class="btn btn-ghost">Ver los {totalBooks} títulos →</a>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {(featured ?? []).map((b, i) => <ProductCard book={b} index={i} />)}
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {(featured ?? []).slice(0, 8).map((b, i) => <ProductCard book={b} index={i} />)}
       {
         (featured ?? []).length === 0 && (
           <div class="col-span-full card p-10 text-center mono text-[12px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
-            Cargando catálogo… ejecuta el seed para poblar la librería.
+            Catálogo cargando…
           </div>
         )
       }
     </div>
   </section>
 
-  <!-- NOVELTIES SLIDER -->
+  <!-- COLOMBIANA -->
   <div class="hairline">
     <ProductSlider
-      eyebrow="§02 — Novedades"
-      title="Recién llegados"
-      books={novelties ?? []}
-      moreHref="/catalog?sort=new"
+      eyebrow="§02 — Literatura colombiana"
+      title="Desde casa"
+      books={colombianos ?? []}
+      moreHref="/catalog?genre=Literatura%20colombiana"
     />
   </div>
 
-  <!-- GENRES -->
+  <!-- NOVEDADES -->
+  <div class="hairline border-t">
+    <ProductSlider
+      eyebrow="§03 — Más del catálogo"
+      title="Sigue explorando"
+      books={novelties ?? []}
+      moreHref="/catalog"
+    />
+  </div>
+
+  <!-- GÉNEROS -->
   <section class="mx-auto max-w-[1440px] px-6 py-16 border-t border-[color:var(--color-line)]" data-testid="genres">
-    <div class="label mb-2">§03 — Géneros</div>
-    <h2 class="text-[32px] md:text-[42px] mb-8 tracking-tight">Explora por criterio</h2>
+    <div class="label mb-2">§04 — Géneros</div>
+    <h2 class="text-[32px] md:text-[42px] mb-8 tracking-tight">Busca por lo que te gusta</h2>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
       {
         genres.map(([g, n], i) => (
           <a
             href={`/catalog?genre=${encodeURIComponent(g)}`}
             class="card p-5 flex items-end justify-between gap-2 min-h-[140px] transition-colors hover:border-[color:var(--color-ink)] group"
-            data-testid={`genre-${g.toLowerCase()}`}
+            data-testid={`genre-${g.toLowerCase().replace(/\s+/g, '-')}`}
           >
             <div>
               <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)] mb-2">
                 §{String(i + 1).padStart(2, '0')}
               </div>
-              <div class="text-[22px] tracking-tight">{g}</div>
+              <div class="text-[20px] tracking-tight leading-[1.15]">{g}</div>
               <div class="mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)] mt-1">
                 {n} {n === 1 ? 'título' : 'títulos'}
               </div>
@@ -168,56 +254,109 @@ const totalBooks = (genresRaw ?? []).length;
           </a>
         ))
       }
-      {
-        genres.length === 0 && (
-          <div class="col-span-full mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
-            Aún no hay géneros — añade libros desde el panel.
-          </div>
-        )
-      }
     </div>
   </section>
 
-  <!-- OFFERS -->
-  <section class="mx-auto max-w-[1440px] px-6 py-16 border-t border-[color:var(--color-line)]" data-testid="offers">
-    <div class="flex items-end justify-between mb-8">
+  <!-- ECONÓMICOS -->
+  <section class="mx-auto max-w-[1440px] px-6 py-16 border-t border-[color:var(--color-line)]" data-testid="economics">
+    <div class="flex items-end justify-between mb-8 gap-4 flex-wrap">
       <div>
-        <div class="label mb-2">§04 — Ofertas</div>
-        <h2 class="text-[32px] md:text-[42px] tracking-tight">Bajo 15 €</h2>
-      </div>
-      <a href="/catalog?offers=1" class="btn btn-ghost">Ver todas</a>
-    </div>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {(offers ?? []).map((b, i) => <ProductCard book={b} index={i} />)}
-      {
-        (offers ?? []).length === 0 && (
-          <div class="col-span-full mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
-            Sin ofertas disponibles ahora mismo.
-          </div>
-        )
-      }
-    </div>
-  </section>
-
-  <!-- NEWSLETTER -->
-  <section class="border-t border-[color:var(--color-line)] bg-[color:var(--color-paper-2)]" data-testid="newsletter-section">
-    <div class="mx-auto max-w-[1440px] px-6 py-20 grid md:grid-cols-12 gap-8">
-      <div class="md:col-span-6">
-        <div class="label mb-3">§05 — Boletín</div>
-        <h2 class="text-[32px] md:text-[48px] tracking-tight leading-[1.02] max-w-lg">
-          Un envío mensual.<br />
-          Cero ruido. Buenos libros.
+        <div class="label mb-2">§05 — Económicos</div>
+        <h2 class="text-[32px] md:text-[42px] tracking-tight">
+          Hasta {formatPrice(15000)}
         </h2>
       </div>
-      <div class="md:col-span-6 md:pl-8 border-l border-[color:var(--color-line)]">
-        <p class="text-[14px] leading-[1.55] text-[color:var(--color-muted)] max-w-md mb-6">
-          Avisos de novedades, extractos seleccionados y 10% de descuento en tu primer pedido.
-          Sin spam, sin trackers invasivos.
+      <a href="/catalog?offers=1" class="btn btn-ghost">Ver todos los económicos →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {(economics ?? []).map((b, i) => <ProductCard book={b} index={i} />)}
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA (real, sin engañar) -->
+  <section class="border-t border-[color:var(--color-line)] bg-[color:var(--color-paper-2)]" data-testid="how-it-works">
+    <div class="mx-auto max-w-[1440px] px-6 py-20 grid md:grid-cols-12 gap-8">
+      <div class="md:col-span-4">
+        <div class="label mb-3">§06 — Cómo pedir</div>
+        <h2 class="text-[32px] md:text-[44px] tracking-tight leading-[1.02] max-w-md">
+          Sin plataformas<br />de pago raras.
+        </h2>
+        <p class="text-[14px] text-[color:var(--color-muted)] leading-[1.6] mt-4 max-w-sm">
+          Aquí no te pedimos tarjeta ni abrimos pasarela. Armas tu pedido en la web,
+          nos escribes por WhatsApp y entre los dos cuadramos pago y entrega. Fácil.
         </p>
-        <NewsletterForm client:load />
-        <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)] mt-4">
-          Al suscribirte aceptas recibir correo editorial. Puedes darte de baja cuando quieras.
-        </div>
+      </div>
+      <div class="md:col-span-8 grid sm:grid-cols-3 gap-3">
+        {
+          [
+            {
+              n: '01',
+              t: 'Arma tu pedido',
+              d: 'Busca en el catálogo y añade tus libros. El carrito se guarda en tu navegador.',
+            },
+            {
+              n: '02',
+              t: 'Envía por WhatsApp',
+              d: 'Confirma el pedido y te generamos el mensaje listo con tus libros y total.',
+            },
+            {
+              n: '03',
+              t: 'Coordinamos pago',
+              d: 'Transferencia, Nequi o Daviplata. Y cuadramos la entrega en Barranquilla.',
+            },
+          ].map((step) => (
+            <div class="card p-5">
+              <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)] mb-3">
+                §{step.n}
+              </div>
+              <div class="text-[18px] tracking-tight mb-2">{step.t}</div>
+              <div class="text-[13px] text-[color:var(--color-muted)] leading-[1.55]">{step.d}</div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="border-t border-[color:var(--color-line)]" data-testid="final-cta">
+    <div class="mx-auto max-w-[1440px] px-6 py-20 grid md:grid-cols-12 gap-6 items-center">
+      <div class="md:col-span-8">
+        <div class="label mb-3">§07 — Hablemos</div>
+        <h2 class="text-[32px] md:text-[48px] tracking-tight leading-[1.02] max-w-xl">
+          Si no encuentras un libro,<br />
+          <span class="text-[color:var(--color-muted)]">pregúntanos.</span>
+        </h2>
+        <p class="text-[14px] text-[color:var(--color-muted)] max-w-md mt-4">
+          No todo está en la web. A veces conseguimos ediciones por encargo.
+          Escríbenos por WhatsApp o por Instagram.
+        </p>
+      </div>
+      <div class="md:col-span-4 flex flex-col gap-3">
+        <a
+          href={`https://wa.me/${whatsapp}?text=${encodeURIComponent('Hola 🦉 Librería del Búho, busco un libro…')}`}
+          target="_blank"
+          rel="noopener"
+          class="btn btn-primary justify-center"
+          data-testid="cta-wa"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606"/></svg>
+          Escribir por WhatsApp
+        </a>
+        <a
+          href={instagramUrl}
+          target="_blank"
+          rel="noopener"
+          class="btn btn-ghost justify-center"
+          data-testid="cta-ig"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="12" cy="12" r="4" />
+            <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" />
+          </svg>
+          Seguir en Instagram · {instagramHandle}
+        </a>
       </div>
     </div>
   </section>

@@ -54,7 +54,7 @@ const sorts = [
         <h1 class="text-[40px] md:text-[56px] tracking-tight">Todos los títulos</h1>
       </div>
       <div class="mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
-        {books?.length ?? 0} resultados
+        Mostrando {books?.length ?? 0} {books?.length === 1 ? 'título' : 'títulos'}
       </div>
     </div>
   </section>
