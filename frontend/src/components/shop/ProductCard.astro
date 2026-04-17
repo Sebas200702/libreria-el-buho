@@ -1,0 +1,91 @@
+---
+import AddToCartButton from './AddToCartButton.tsx';
+import { formatPrice } from '../../lib/utils/format';
+import { coverUrl } from '../../lib/utils/format';
+
+interface Props {
+  book: {
+    id: string;
+    slug: string;
+    title: string;
+    author: string;
+    price: number;
+    stock: number;
+    genre?: string | null;
+    release_year: number;
+    cover_image_path?: string | null;
+  };
+  index?: number;
+  compact?: boolean;
+}
+const { book, index = 0, compact = false } = Astro.props;
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const cover = coverUrl(book.cover_image_path, supabaseUrl);
+const stockDot =
+  book.stock <= 0 ? 'bg-[color:var(--color-danger)]' : book.stock < 3 ? 'bg-[color:var(--color-signal)]' : 'bg-[color:var(--color-success)]';
+---
+
+<article
+  class="group relative flex flex-col card overflow-hidden transition-[border-color,transform] duration-150 hover:border-[color:var(--color-ink)]"
+  data-testid={`product-card-${book.slug}`}
+>
+  <a href={`/product/${book.slug}`} class="relative block">
+    <div class="relative aspect-[2/3] bg-[color:var(--color-paper-3)] overflow-hidden">
+      {
+        cover ? (
+          <img
+            src={cover}
+            alt={book.title}
+            loading={index < 3 ? 'eager' : 'lazy'}
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div class="absolute inset-0 flex items-center justify-center mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">
+            sin portada
+          </div>
+        )
+      }
+      <div class="absolute top-2 left-2 flex items-center gap-1.5 mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] bg-[color:var(--color-paper)]/90 border border-[color:var(--color-line-2)] rounded-full px-2 py-0.5">
+        #{String(index + 1).padStart(2, '0')}
+      </div>
+      <div class="absolute top-2 right-2 mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-ink)] bg-[color:var(--color-paper)]/90 border border-[color:var(--color-line-2)] rounded-full px-2 py-0.5">
+        {book.release_year}
+      </div>
+    </div>
+  </a>
+
+  <div class="px-3.5 pt-3 pb-4 flex flex-col gap-2 flex-1">
+    <div class="flex items-center gap-2">
+      <span class={`inline-block w-1.5 h-1.5 rounded-full ${stockDot}`}></span>
+      <span class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+        {book.genre ?? 'Sin género'}
+      </span>
+    </div>
+    <a href={`/product/${book.slug}`} class="block">
+      <h3 class="text-[15px] leading-[1.25] line-clamp-2 tracking-tight">
+        {book.title}
+      </h3>
+      <div class="text-[12px] text-[color:var(--color-muted)] mt-0.5">
+        {book.author}
+      </div>
+    </a>
+    <div class="mt-auto pt-3 flex items-center justify-between">
+      <div class="mono text-[15px] tabular-nums">{formatPrice(book.price)}</div>
+      {!compact && (
+        <AddToCartButton
+          client:load
+          variant="icon"
+          item={{
+            book_id: book.id,
+            slug: book.slug,
+            title: book.title,
+            author: book.author,
+            price: book.price,
+            cover_image_path: book.cover_image_path ?? null,
+            stock: book.stock,
+          }}
+        />
+      )}
+    </div>
+  </div>
+</article>

@@ -1,0 +1,167 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { formatPrice, formatDate } from '../../lib/utils/format';
+
+const supabase = Astro.locals.supabase;
+const user = Astro.locals.user;
+
+const [booksRes, ordersRes, subsRes, recentOrdersRes, lowStockRes] = await Promise.all([
+  supabase.from('books').select('id, stock, reserved_stock, published', { count: 'exact' }),
+  supabase.from('orders').select('id, total, status, created_at'),
+  supabase.from('subscribers').select('id', { count: 'exact', head: true }),
+  supabase.from('orders').select('id, customer_name, total, status, created_at').order('created_at', { ascending: false }).limit(6),
+  supabase.from('books').select('id, title, author, stock, reserved_stock').lte('stock', 5).order('stock', { ascending: true }).limit(6),
+]);
+
+const books = booksRes.data ?? [];
+const orders = ordersRes.data ?? [];
+const totalBooks = booksRes.count ?? books.length;
+const publishedBooks = books.filter((b: { published: boolean }) => b.published).length;
+const totalStock = books.reduce((s: number, b: { stock: number }) => s + (b.stock ?? 0), 0);
+const subCount = subsRes.count ?? 0;
+
+const pending = orders.filter((o) => o.status === 'pending');
+const completed = orders.filter((o) => o.status === 'completed');
+const canceled = orders.filter((o) => o.status === 'canceled');
+const revenue = completed.reduce((s, o) => s + Number(o.total ?? 0), 0);
+const pipeline = pending.reduce((s, o) => s + Number(o.total ?? 0), 0);
+
+const recent = recentOrdersRes.data ?? [];
+const low = lowStockRes.data ?? [];
+
+const kpis = [
+  { label: 'Ingresos (completados)', value: formatPrice(revenue), sub: `${completed.length} pedidos` },
+  { label: 'En trámite', value: formatPrice(pipeline), sub: `${pending.length} pendientes` },
+  { label: 'Catálogo', value: `${publishedBooks}/${totalBooks}`, sub: 'publicados / total' },
+  { label: 'Inventario', value: `${totalStock}`, sub: 'unidades en stock' },
+  { label: 'Suscriptores', value: `${subCount}`, sub: 'boletín activo' },
+  { label: 'Cancelados', value: `${canceled.length}`, sub: 'pedidos' },
+];
+---
+
+<AdminLayout title="Dashboard — Admin" section="dashboard" user={user}>
+  <div class="px-6 md:px-10 py-8" data-testid="dashboard">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <div class="label mb-2">§ Dashboard</div>
+        <h1 class="text-[36px] md:text-[44px] tracking-tight">Resumen</h1>
+      </div>
+      <div class="mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+        {formatDate(new Date())}
+      </div>
+    </div>
+
+    <!-- KPI GRID -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3" data-testid="kpi-grid">
+      {
+        kpis.map((k, i) => (
+          <div class="card p-5">
+            <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)] mb-2">
+              §{String(i + 1).padStart(2, '0')} — {k.label}
+            </div>
+            <div class="mono text-[32px] md:text-[38px] tabular-nums tracking-tight">
+              {k.value}
+            </div>
+            <div class="text-[12px] text-[color:var(--color-muted)] mt-1">{k.sub}</div>
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- Recent orders + low stock -->
+    <div class="grid grid-cols-12 gap-4 mt-10">
+      <div class="col-span-12 lg:col-span-7">
+        <div class="card overflow-hidden">
+          <div class="flex items-center justify-between p-5 border-b border-[color:var(--color-line)]">
+            <div>
+              <div class="label">§ Pedidos recientes</div>
+              <div class="text-[18px] mt-0.5">Últimas 6 operaciones</div>
+            </div>
+            <a href="/admin/orders" class="btn btn-ghost">Ver todos →</a>
+          </div>
+          <table class="w-full text-[13px]">
+            <thead class="text-left mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">
+              <tr class="border-b border-[color:var(--color-line)]">
+                <th class="px-5 py-2.5">Cliente</th>
+                <th class="px-5 py-2.5">Estado</th>
+                <th class="px-5 py-2.5 text-right">Total</th>
+                <th class="px-5 py-2.5 text-right">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                recent.map((o) => (
+                  <tr class="border-b border-[color:var(--color-line)] last:border-0">
+                    <td class="px-5 py-3">
+                      <div class="font-medium">{o.customer_name}</div>
+                      <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">
+                        {(o.id as string).slice(0, 8)}
+                      </div>
+                    </td>
+                    <td class="px-5 py-3">
+                      <span class:list={[
+                        'chip',
+                        o.status === 'pending' && 'bg-[color:var(--color-signal-wash)] text-[color:var(--color-signal)] border-[color:var(--color-signal)]',
+                        o.status === 'completed' && 'bg-green-50 text-[color:var(--color-success)] border-[color:var(--color-success)]',
+                        o.status === 'canceled' && 'bg-red-50 text-[color:var(--color-danger)] border-[color:var(--color-danger)]',
+                      ]}>
+                        {o.status === 'pending' ? 'Pendiente' : o.status === 'completed' ? 'Entregado' : 'Cancelado'}
+                      </span>
+                    </td>
+                    <td class="px-5 py-3 text-right mono tabular-nums">{formatPrice(Number(o.total))}</td>
+                    <td class="px-5 py-3 text-right mono text-[11px] text-[color:var(--color-muted)]">
+                      {formatDate(o.created_at)}
+                    </td>
+                  </tr>
+                ))
+              }
+              {
+                recent.length === 0 && (
+                  <tr>
+                    <td colspan="4" class="px-5 py-10 text-center mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+                      Sin pedidos todavía.
+                    </td>
+                  </tr>
+                )
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-span-12 lg:col-span-5">
+        <div class="card">
+          <div class="flex items-center justify-between p-5 border-b border-[color:var(--color-line)]">
+            <div>
+              <div class="label">§ Inventario bajo</div>
+              <div class="text-[18px] mt-0.5">≤ 5 unidades</div>
+            </div>
+            <a href="/admin/products" class="btn btn-ghost">Gestionar →</a>
+          </div>
+          <ul>
+            {
+              low.map((b) => (
+                <li class="flex items-center justify-between px-5 py-3 border-b border-[color:var(--color-line)] last:border-0">
+                  <div class="min-w-0">
+                    <div class="text-[14px] truncate">{b.title}</div>
+                    <div class="text-[12px] text-[color:var(--color-muted)]">{b.author}</div>
+                  </div>
+                  <div class="mono text-[13px] tabular-nums">
+                    {b.stock - (b.reserved_stock ?? 0)} / {b.stock}
+                  </div>
+                </li>
+              ))
+            }
+            {
+              low.length === 0 && (
+                <li class="px-5 py-10 text-center mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+                  Inventario saludable.
+                </li>
+              )
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>

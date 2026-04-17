@@ -1,0 +1,81 @@
+---
+import CartButton from '../shop/CartButton.tsx';
+
+interface Props {
+  cartCount?: number;
+}
+const { cartCount = 0 } = Astro.props;
+const path = new URL(Astro.request.url).pathname;
+
+const nav = [
+  { href: '/', label: 'Inicio' },
+  { href: '/catalog', label: 'Catálogo' },
+  { href: '/catalog?genre=Ficci%C3%B3n', label: 'Ficción' },
+  { href: '/catalog?genre=Ensayo', label: 'Ensayo' },
+  { href: '/catalog?sort=new', label: 'Novedades' },
+];
+---
+
+<header
+  class="sticky top-0 z-40 border-b border-[color:var(--color-line)] bg-[color:var(--color-paper)]/85 backdrop-blur"
+  data-testid="site-header"
+>
+  <div class="mx-auto flex max-w-[1440px] items-center justify-between gap-6 px-6 py-3">
+    <a href="/" class="flex items-center gap-2" data-testid="logo-link">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="14" stroke="#0A0A0A" stroke-width="2" fill="#F7F7F5" />
+        <circle cx="11" cy="13" r="3" fill="#0A0A0A" />
+        <circle cx="21" cy="13" r="3" fill="#0A0A0A" />
+        <path d="M10 21 L16 19 L22 21" stroke="#0A0A0A" stroke-width="1.5" />
+      </svg>
+      <span class="text-[15px] font-medium tracking-tight">Buho Books</span>
+      <span class="mono hidden sm:inline text-[10px] text-[color:var(--color-muted-2)] uppercase tracking-[0.14em] border border-[color:var(--color-line-2)] rounded-full px-2 py-[2px] ml-1">
+        ed. 01
+      </span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-1" aria-label="Principal">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'px-3 py-2 text-[13px] rounded-[10px] transition-colors',
+              path === item.href
+                ? 'bg-[color:var(--color-ink)] text-[color:var(--color-paper)]'
+                : 'text-[color:var(--color-ink)] hover:bg-[color:var(--color-paper-3)]',
+            ]}
+            data-testid={`nav-${item.label.toLowerCase()}`}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a
+        href="/catalog"
+        class="icon-btn"
+        aria-label="Buscar"
+        data-testid="search-btn"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </a>
+      <a
+        href="/admin"
+        class="icon-btn"
+        aria-label="Admin"
+        data-testid="admin-link"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" />
+        </svg>
+      </a>
+      <CartButton client:load initialCount={cartCount} />
+    </div>
+  </div>
+</header>

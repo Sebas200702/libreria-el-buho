@@ -1,0 +1,224 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductSlider from '../components/shop/ProductSlider.astro';
+import ProductCard from '../components/shop/ProductCard.astro';
+import NewsletterForm from '../components/shop/NewsletterForm.tsx';
+import { getServerSupabase } from '../lib/supabase/server';
+
+const supabase = getServerSupabase({ request: Astro.request, cookies: Astro.cookies });
+
+const { data: featured } = await supabase
+  .from('books')
+  .select('id, slug, title, author, price, stock, genre, release_year, cover_image_path')
+  .eq('published', true)
+  .order('created_at', { ascending: false })
+  .limit(6);
+
+const { data: novelties } = await supabase
+  .from('books')
+  .select('id, slug, title, author, price, stock, genre, release_year, cover_image_path')
+  .eq('published', true)
+  .order('release_year', { ascending: false })
+  .limit(12);
+
+const { data: offers } = await supabase
+  .from('books')
+  .select('id, slug, title, author, price, stock, genre, release_year, cover_image_path')
+  .eq('published', true)
+  .lte('price', 15)
+  .order('price', { ascending: true })
+  .limit(6);
+
+const { data: genresRaw } = await supabase
+  .from('books')
+  .select('genre')
+  .eq('published', true)
+  .not('genre', 'is', null);
+
+const genreCounts = new Map<string, number>();
+(genresRaw ?? []).forEach((row) => {
+  const g = (row as { genre: string | null }).genre;
+  if (!g) return;
+  genreCounts.set(g, (genreCounts.get(g) ?? 0) + 1);
+});
+const genres = [...genreCounts.entries()].slice(0, 8);
+const totalBooks = (genresRaw ?? []).length;
+---
+
+<BaseLayout
+  title="Buho Books — Librería editorial"
+  description="Libros seleccionados con rigor. Editorial y distribución independiente."
+>
+  <!-- HERO -->
+  <section class="relative border-b border-[color:var(--color-line)] overflow-hidden" data-testid="hero">
+    <div class="absolute inset-0 grid-lines opacity-60 pointer-events-none"></div>
+    <div class="relative mx-auto max-w-[1440px] px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+      <div class="flex items-center gap-3 mb-8 fade-up">
+        <span class="chip" data-testid="hero-chip">
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-[color:var(--color-success)]"></span>
+          Ed. 01 — Invierno 2026
+        </span>
+        <span class="mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">
+          Catálogo vivo · {totalBooks} títulos
+        </span>
+      </div>
+
+      <h1
+        class="fade-up text-[44px] md:text-[88px] leading-[0.95] tracking-[-0.03em] max-w-5xl"
+        style="animation-delay: 80ms"
+      >
+        Una librería<br />
+        <span class="text-[color:var(--color-muted)]">con índice,</span><br />
+        colofón y criterio.
+      </h1>
+
+      <p
+        class="fade-up mt-8 max-w-xl text-[16px] leading-[1.55] text-[color:var(--color-muted)]"
+        style="animation-delay: 160ms"
+      >
+        Seleccionamos lecturas esenciales: ficción contemporánea, ensayo, poesía y técnica.
+        Editamos con respeto por el papel y enviamos con precisión de relojería.
+      </p>
+
+      <div class="fade-up mt-10 flex flex-wrap items-center gap-3" style="animation-delay: 240ms">
+        <a href="/catalog" class="btn btn-primary" data-testid="hero-cta-primary">
+          Explorar catálogo
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14" /><path d="M13 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="/catalog?sort=new" class="btn btn-ghost" data-testid="hero-cta-secondary">
+          Ver novedades
+        </a>
+      </div>
+
+      <!-- marquee ticker -->
+      <div class="fade-up mt-16 overflow-hidden border-y border-[color:var(--color-line)] py-3" style="animation-delay: 320ms">
+        <div class="marquee-track flex whitespace-nowrap gap-10 mono text-[12px] uppercase tracking-[0.18em] text-[color:var(--color-muted)]">
+          {
+            Array.from({ length: 2 }).flatMap((_, r) => [
+              <span>◇ Envío en 48h península</span>,
+              <span>◇ Papel FSC certificado</span>,
+              <span>◇ Packaging libre de plástico</span>,
+              <span>◇ {totalBooks} títulos activos</span>,
+              <span>◇ Descuento 10% con newsletter</span>,
+              <span>◇ Edición independiente</span>,
+            ])
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED GRID -->
+  <section class="mx-auto max-w-[1440px] px-6 py-16" data-testid="featured">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <div class="label mb-2">§01 — Destacados</div>
+        <h2 class="text-[32px] md:text-[42px] tracking-tight">Selección editorial</h2>
+      </div>
+      <a href="/catalog" class="btn btn-ghost">Ver catálogo completo</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {(featured ?? []).map((b, i) => <ProductCard book={b} index={i} />)}
+      {
+        (featured ?? []).length === 0 && (
+          <div class="col-span-full card p-10 text-center mono text-[12px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+            Cargando catálogo… ejecuta el seed para poblar la librería.
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- NOVELTIES SLIDER -->
+  <div class="hairline">
+    <ProductSlider
+      eyebrow="§02 — Novedades"
+      title="Recién llegados"
+      books={novelties ?? []}
+      moreHref="/catalog?sort=new"
+    />
+  </div>
+
+  <!-- GENRES -->
+  <section class="mx-auto max-w-[1440px] px-6 py-16 border-t border-[color:var(--color-line)]" data-testid="genres">
+    <div class="label mb-2">§03 — Géneros</div>
+    <h2 class="text-[32px] md:text-[42px] mb-8 tracking-tight">Explora por criterio</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {
+        genres.map(([g, n], i) => (
+          <a
+            href={`/catalog?genre=${encodeURIComponent(g)}`}
+            class="card p-5 flex items-end justify-between gap-2 min-h-[140px] transition-colors hover:border-[color:var(--color-ink)] group"
+            data-testid={`genre-${g.toLowerCase()}`}
+          >
+            <div>
+              <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)] mb-2">
+                §{String(i + 1).padStart(2, '0')}
+              </div>
+              <div class="text-[22px] tracking-tight">{g}</div>
+              <div class="mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)] mt-1">
+                {n} {n === 1 ? 'título' : 'títulos'}
+              </div>
+            </div>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[color:var(--color-ink)] opacity-60 group-hover:opacity-100 transition-opacity">
+              <path d="M5 12h14" /><path d="M13 5l7 7-7 7" />
+            </svg>
+          </a>
+        ))
+      }
+      {
+        genres.length === 0 && (
+          <div class="col-span-full mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+            Aún no hay géneros — añade libros desde el panel.
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- OFFERS -->
+  <section class="mx-auto max-w-[1440px] px-6 py-16 border-t border-[color:var(--color-line)]" data-testid="offers">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <div class="label mb-2">§04 — Ofertas</div>
+        <h2 class="text-[32px] md:text-[42px] tracking-tight">Bajo 15 €</h2>
+      </div>
+      <a href="/catalog?offers=1" class="btn btn-ghost">Ver todas</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {(offers ?? []).map((b, i) => <ProductCard book={b} index={i} />)}
+      {
+        (offers ?? []).length === 0 && (
+          <div class="col-span-full mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+            Sin ofertas disponibles ahora mismo.
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="border-t border-[color:var(--color-line)] bg-[color:var(--color-paper-2)]" data-testid="newsletter-section">
+    <div class="mx-auto max-w-[1440px] px-6 py-20 grid md:grid-cols-12 gap-8">
+      <div class="md:col-span-6">
+        <div class="label mb-3">§05 — Boletín</div>
+        <h2 class="text-[32px] md:text-[48px] tracking-tight leading-[1.02] max-w-lg">
+          Un envío mensual.<br />
+          Cero ruido. Buenos libros.
+        </h2>
+      </div>
+      <div class="md:col-span-6 md:pl-8 border-l border-[color:var(--color-line)]">
+        <p class="text-[14px] leading-[1.55] text-[color:var(--color-muted)] max-w-md mb-6">
+          Avisos de novedades, extractos seleccionados y 10% de descuento en tu primer pedido.
+          Sin spam, sin trackers invasivos.
+        </p>
+        <NewsletterForm client:load />
+        <div class="mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)] mt-4">
+          Al suscribirte aceptas recibir correo editorial. Puedes darte de baja cuando quieras.
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

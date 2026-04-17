@@ -1,0 +1,85 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="relative z-10 border-t border-[color:var(--color-line)] bg-[color:var(--color-paper-2)] mt-24">
+  <div class="mx-auto max-w-[1440px] px-6 py-16 grid grid-cols-12 gap-6">
+    <div class="col-span-12 md:col-span-5">
+      <div class="flex items-center gap-2 mb-5">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <circle cx="16" cy="16" r="14" stroke="#0A0A0A" stroke-width="2" fill="#F7F7F5" />
+          <circle cx="11" cy="13" r="3" fill="#0A0A0A" />
+          <circle cx="21" cy="13" r="3" fill="#0A0A0A" />
+          <path d="M10 21 L16 19 L22 21" stroke="#0A0A0A" stroke-width="1.5" />
+        </svg>
+        <span class="text-[18px] font-medium">Buho Books</span>
+      </div>
+      <p class="text-[14px] max-w-sm leading-[1.6] text-[color:var(--color-muted)]">
+        Editorial y distribución independiente. Catálogo curado, ediciones en papel de calidad,
+        envío calculado con precisión.
+      </p>
+
+      <div class="flex items-center gap-3 mt-6">
+        <a href="#" aria-label="Instagram" class="icon-btn" data-testid="social-ig">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="12" cy="12" r="4" />
+            <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" />
+          </svg>
+        </a>
+        <a href="#" aria-label="X / Twitter" class="icon-btn" data-testid="social-x">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18 3h3l-7.5 8.6L22 21h-6.6l-5.2-6.3L4 21H1l8-9.2L1.5 3H8l4.7 5.9z" />
+          </svg>
+        </a>
+        <a href="#" aria-label="RSS" class="icon-btn" data-testid="social-rss">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 11a9 9 0 0 1 9 9" />
+            <path d="M4 4a16 16 0 0 1 16 16" />
+            <circle cx="5" cy="19" r="1.5" fill="currentColor" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-span-6 md:col-span-2">
+      <div class="label mb-3">Tienda</div>
+      <ul class="space-y-2 text-[14px]">
+        <li><a href="/catalog" class="hover:underline" data-testid="footer-catalog">Catálogo</a></li>
+        <li><a href="/catalog?sort=new" class="hover:underline">Novedades</a></li>
+        <li><a href="/catalog?offers=1" class="hover:underline">Ofertas</a></li>
+        <li><a href="/cart" class="hover:underline">Carrito</a></li>
+      </ul>
+    </div>
+
+    <div class="col-span-6 md:col-span-2">
+      <div class="label mb-3">Géneros</div>
+      <ul class="space-y-2 text-[14px]">
+        <li><a href="/catalog?genre=Ficci%C3%B3n" class="hover:underline">Ficción</a></li>
+        <li><a href="/catalog?genre=Ensayo" class="hover:underline">Ensayo</a></li>
+        <li><a href="/catalog?genre=Poes%C3%ADa" class="hover:underline">Poesía</a></li>
+        <li><a href="/catalog?genre=T%C3%A9cnica" class="hover:underline">Técnica</a></li>
+      </ul>
+    </div>
+
+    <div class="col-span-12 md:col-span-3">
+      <div class="label mb-3">Editorial</div>
+      <ul class="space-y-2 text-[14px]">
+        <li><a href="/admin" class="hover:underline" data-testid="footer-admin">Panel interno</a></li>
+        <li><a href="mailto:hola@buhobooks.co" class="hover:underline">hola@buhobooks.co</a></li>
+        <li class="text-[color:var(--color-muted)]">Calle del Libro 42, Madrid</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-[color:var(--color-line)]">
+    <div class="mx-auto max-w-[1440px] px-6 py-5 flex flex-wrap items-center justify-between gap-3">
+      <div class="mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">
+        © {year} Buho Books — Catálogo v0.1 — ISSN 0000-0000
+      </div>
+      <div class="mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--color-muted-2)]">
+        Hecho en papel · Servido en bytes
+      </div>
+    </div>
+  </div>
+</footer>

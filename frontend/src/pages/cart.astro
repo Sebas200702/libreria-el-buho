@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CartPage from '../components/shop/CartPage.tsx';
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+---
+
+<BaseLayout title="Carrito — Buho Books">
+  <section class="mx-auto max-w-[1440px] px-6 pt-10 pb-6 border-b border-[color:var(--color-line)]">
+    <div class="label mb-2">§ Checkout</div>
+    <h1 class="text-[40px] md:text-[56px] tracking-tight">Tu pedido</h1>
+  </section>
+  <section class="mx-auto max-w-[1440px] px-6 py-10">
+    <CartPage client:only="react" supabaseUrl={supabaseUrl} />
+  </section>
+</BaseLayout>
