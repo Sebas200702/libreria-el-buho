@@ -1,0 +1,176 @@
+---
+import ArrowLeftIcon from '@/components/icons/ArrowLeftIcon.astro'
+import WhatsAppIcon from '@/components/icons/WhatsAppIcon.astro'
+import { AddToCartButton } from '@/components/shop/AddToCartButton.tsx'
+import ProductCard from '@/components/shop/ProductCard.astro'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getServerSupabase } from '@/lib/supabase/server'
+import { coverUrl, formatPrice } from '@/lib/utils/format'
+
+const { slug } = Astro.params
+const whatsapp = import.meta.env.PUBLIC_WHATSAPP_NUMBER
+const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? ''
+const supabase = getServerSupabase({
+	request: Astro.request,
+	cookies: Astro.cookies,
+})
+
+const { data: book } = await supabase
+	.from('books')
+	.select('*')
+	.eq('slug', slug as string)
+	.eq('published', true)
+	.maybeSingle()
+
+if (!book) {
+	return Astro.redirect('/catalog', 302)
+}
+
+const { data: related } = await supabase
+	.from('books')
+	.select(
+		'id, slug, title, author, price, stock, genre, release_year, cover_image_path',
+	)
+	.eq('published', true)
+	.neq('id', book.id)
+	.eq('genre', book.genre ?? '')
+	.limit(4)
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL
+const cover = coverUrl(book.cover_image_path, supabaseUrl)
+const available = Math.max(0, (book.stock ?? 0) - (book.reserved_stock ?? 0))
+
+const waMessage = `Hola 🦉 Librería del Búho\n\nMe interesa este libro:\n• ${book.title} — ${book.author}\n• Precio: ${formatPrice(book.price)}\n• Enlace: ${siteUrl}/product/${book.slug}\n\n¿Está disponible?`
+const waUrl = `https://wa.me/${whatsapp}?text=${encodeURIComponent(waMessage)}`
+---
+
+<BaseLayout title={`${book.title} — ${book.author}`} description={book.description ?? undefined}>
+  <section class="mx-auto max-w-360 px-6 py-10" data-testid={`product-${book.slug}`}>
+    <a href="/catalog" class="mono text-[11px] uppercase tracking-[0.14em] text-muted hover:text-ink inline-flex items-center gap-1.5 mb-8">
+      <ArrowLeftIcon width="12" height="12" strokeWidth="2" />
+      Volver al catálogo
+    </a>
+
+    <div class="grid grid-cols-12 gap-8">
+      <!-- Image -->
+      <div class="col-span-12 md:col-span-5">
+        <div class="card overflow-hidden aspect-2/3 bg-paper-3 relative">
+          {
+            cover ? (
+              <img src={cover} alt={book.title} class="w-full h-full object-cover" transition:name={`${book.slug}-img`} />
+            ) : (
+              <div class="absolute inset-0 flex items-center justify-center mono text-[11px] uppercase tracking-[0.14em] text-muted-2">
+                sin portada
+              </div>
+            )
+          }
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div class="col-span-12 md:col-span-7">
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          {book.genre && <span class="chip" data-testid="product-genre">{book.genre}</span>}
+          <span class="chip">
+            <span class={`inline-block w-1.5 h-1.5 rounded-full ${
+              available === 0 ? 'bg-danger' : available < 3 ? 'bg-signal' : 'bg-success'
+            }`} />
+            {available === 0 ? 'Agotado' : `${available} en stock`}
+          </span>
+          <span class="chip">{book.release_year}</span>
+        </div>
+
+        <h1 class="text-[36px] md:text-[56px] tracking-[-0.03em] leading-[1.02]">
+          {book.title}
+        </h1>
+        <div class="text-[18px] text-muted mt-2">
+          por <span class="text-ink">{book.author}</span>
+        </div>
+
+        <div class="mt-6 flex items-baseline gap-4">
+          <div class="mono text-[40px] md:text-[52px] tabular-nums">
+            {formatPrice(book.price)}
+          </div>
+          <div class="mono text-[11px] uppercase tracking-[0.14em] text-muted-2">
+            IVA incluido · Envío calculado al pagar
+          </div>
+        </div>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <div class="w-full md:w-auto md:min-w-65">
+            <AddToCartButton
+              client:load
+              variant="primary"
+              item={{
+                book_id: book.id,
+                slug: book.slug,
+                title: book.title,
+                author: book.author,
+                price: book.price,
+                cover_image_path: book.cover_image_path,
+                stock: available,
+              }}
+            />
+          </div>
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener"
+            class="btn btn-ghost inline-flex items-center gap-2"
+            data-testid="product-whatsapp"
+          >
+            <WhatsAppIcon width="14" height="14" class="text-success" />
+            Preguntar por WhatsApp
+          </a>
+          <a href="/cart" class="btn btn-ghost">Ir al carrito →</a>
+        </div>
+
+        {
+          book.description && (
+            <div class="mt-10 prose prose-neutral max-w-none">
+              <div class="label mb-3"> Sinopsis</div>
+              <p class="text-[15px] leading-[1.65] text-ink-2 whitespace-pre-line">
+                {book.description}
+              </p>
+            </div>
+          )
+        }
+
+        <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-3 text-[13px]">
+          <div class="card p-4">
+            <div class="label mb-1">Autor</div>
+            <div>{book.author}</div>
+          </div>
+          <div class="card p-4">
+            <div class="label mb-1">Año</div>
+            <div class="mono">{book.release_year}</div>
+          </div>
+          <div class="card p-4">
+            <div class="label mb-1">Género</div>
+            <div>{book.genre ?? '—'}</div>
+          </div>
+          <div class="card p-4">
+            <div class="label mb-1">Categoría</div>
+            <div>{book.category ?? '—'}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {
+      (related?.length ?? 0) > 0 && (
+        <div class="mt-20 border-t border-line pt-12">
+          <div class="flex items-end justify-between mb-6">
+            <div>
+              <div class="label mb-2"> Relacionados</div>
+              <h2 class="text-[28px] tracking-tight">Del mismo género</h2>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {related!.map((b, i) => <ProductCard book={b} index={i} />)}
+          </div>
+        </div>
+      )
+    }
+  </section>
+</BaseLayout>

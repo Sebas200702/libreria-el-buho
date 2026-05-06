@@ -1,0 +1,60 @@
+---
+// Horizontal slider using scroll-snap. No external lib needed.
+import ProductCard from '@/components/shop/ProductCard.astro'
+import ArrowRightIcon from '@/components/icons/ArrowRightIcon.astro'
+
+interface Props {
+	title: string
+	eyebrow?: string
+	books: Array<{
+		id: string
+		slug: string
+		title: string
+		author: string
+		price: number
+		stock: number
+		genre?: string | null
+		release_year: number
+		cover_image_path?: string | null
+	}>
+	moreHref?: string
+}
+const { title, eyebrow, books, moreHref } = Astro.props
+---
+
+<section class="mx-auto max-w-360 px-6 py-12" data-testid={`slider-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      {eyebrow && <div class="label mb-2">{eyebrow}</div>}
+      <h2 class="text-[32px] md:text-[42px] font-medium tracking-tight">{title}</h2>
+    </div>
+    {
+      moreHref && (
+        <a href={moreHref} class="btn btn-ghost" data-testid="slider-more">
+          Ver todo
+          <ArrowRightIcon width="14" height="14" />
+        </a>
+      )
+    }
+  </div>
+
+  <div class="relative">
+    <div
+      class="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 -mx-1 px-1"
+      style="scrollbar-width: thin;"
+    >
+      {
+        books.map((b, i) => (
+          <div class="snap-start shrink-0 w-55 md:w-65">
+            <ProductCard book={b} index={i} />
+          </div>
+        ))
+      }
+      {books.length === 0 && (
+        <div class="w-full py-12 text-center mono text-[11px] uppercase tracking-[0.14em] text-muted-2">
+          Aún no hay libros en esta sección
+        </div>
+      )}
+    </div>
+  </div>
+</section>

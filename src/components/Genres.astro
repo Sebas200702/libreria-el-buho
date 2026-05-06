@@ -1,0 +1,36 @@
+---
+import ArrowRightIcon from './icons/ArrowRightIcon.astro'
+
+interface Props {
+	genres: [string, number][]
+}
+
+const { genres } = Astro.props
+---
+
+<section class="mx-auto max-w-360 px-6 py-16 border-t border-line" data-testid="genres">
+  <div class="label mb-2">04 — Géneros</div>
+  <h2 class="text-[32px] md:text-[42px] mb-8 tracking-tight">Busca por lo que te gusta</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    {
+      genres.map(([g, n], i) => (
+        <a
+          href={`/catalog?genre=${encodeURIComponent(g)}`}
+          class="card p-5 flex items-end justify-between gap-2 min-h-35 transition-colors hover:border-ink group"
+          data-testid={`genre-${g.toLowerCase().replace(/\s+/g, '-')}`}
+        >
+          <div>
+            <div class="mono text-[10px] uppercase tracking-[0.14em] text-muted-2 mb-2">
+              {String(i + 1).padStart(2, '0')}
+            </div>
+            <div class="text-[20px] tracking-tight leading-[1.15]">{g}</div>
+            <div class="mono text-[11px] uppercase tracking-[0.14em] text-muted mt-1">
+              {n} {n === 1 ? 'título' : 'títulos'}
+            </div>
+          </div>
+          <ArrowRightIcon width="22" height="22" strokeWidth="1.5" class="text-ink opacity-60 group-hover:opacity-100 transition-opacity" />
+        </a>
+      ))
+    }
+  </div>
+</section>

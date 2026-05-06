@@ -1,0 +1,46 @@
+---
+---
+
+<section class="border-t border-line bg-paper-2" data-testid="how-it-works">
+  <div class="mx-auto max-w-360 px-6 py-20 grid md:grid-cols-12 gap-8">
+    <div class="md:col-span-4">
+      <div class="label mb-3">06 — Cómo pedir</div>
+      <h2 class="text-[32px] md:text-[44px] tracking-tight leading-[1.02] max-w-md">
+        Sin plataformas<br />de pago raras.
+      </h2>
+      <p class="text-[14px] text-muted leading-[1.6] mt-4 max-w-sm">
+        Aquí no te pedimos tarjeta ni abrimos pasarela. Armas tu pedido en la web,
+        nos escribes por WhatsApp y entre los dos cuadramos pago y entrega. Fácil.
+      </p>
+    </div>
+    <div class="md:col-span-8 grid sm:grid-cols-3 gap-3">
+      {
+        [
+          {
+            n: '01',
+            t: 'Arma tu pedido',
+            d: 'Busca en el catálogo y añade tus libros. El carrito se guarda en tu navegador.',
+          },
+          {
+            n: '02',
+            t: 'Envía por WhatsApp',
+            d: 'Confirma el pedido y te generamos el mensaje listo con tus libros y total.',
+          },
+          {
+            n: '03',
+            t: 'Coordinamos pago',
+            d: 'Transferencia, Nequi o Daviplata. Y cuadramos la entrega en Barranquilla.',
+          },
+        ].map((step) => (
+          <div class="card p-5">
+            <div class="mono text-[10px] uppercase tracking-[0.14em] text-muted-2 mb-3">
+              {step.n}
+            </div>
+            <div class="text-[18px] tracking-tight mb-2">{step.t}</div>
+            <div class="text-[13px] text-muted leading-[1.55]">{step.d}</div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

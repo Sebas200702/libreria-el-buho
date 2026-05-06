@@ -1,0 +1,22 @@
+---
+import { CartPage } from '@/components/shop/CartPage.tsx'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+
+import { env } from '@/config/env'
+
+const supabaseUrl = env.SUPABASE_URL
+const whatsappNumber = env.WHATSAPP_NUMBER
+---
+
+<BaseLayout title="Tu pedido — Librería del Búho">
+  <section class="mx-auto max-w-[1440px] px-6 pt-10 pb-6 border-b border-[color:var(--color-line)]">
+    <div class="label mb-2"> Tu pedido</div>
+    <h1 class="text-[40px] md:text-[56px] tracking-tight">Revisa y confirma</h1>
+    <p class="text-[14px] text-[color:var(--color-muted)] mt-2 max-w-xl">
+      Cuando confirmes, te abrimos WhatsApp con el resumen listo. Allí cuadramos pago y entrega.
+    </p>
+  </section>
+  <section class="mx-auto max-w-[1440px] px-6 py-10">
+    <CartPage client:only="react" supabaseUrl={supabaseUrl} whatsappNumber={whatsappNumber} />
+  </section>
+</BaseLayout>

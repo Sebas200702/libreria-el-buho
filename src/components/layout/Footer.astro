@@ -1,0 +1,112 @@
+---
+import InstagramIcon from '@/components/icons/InstagramIcon.astro'
+import WhatsAppIcon from '@/components/icons/WhatsAppIcon.astro'
+
+import { media } from '@/config/media'
+---
+
+<footer class="relative z-10 border-t border-line bg-paper-2 mt-24">
+  <div class="mx-auto max-w-360 px-6 py-16 grid grid-cols-12 gap-6">
+    <div class="col-span-12 md:col-span-5">
+      <div class="flex items-center gap-3 mb-5">
+        <img
+          src={media.logoUrl}
+          alt="Librería del Búho"
+          width="44"
+          height="44"
+          class="w-11 h-11 rounded-full border border-line-2 bg-white object-contain p-1"
+        />
+        <div>
+          <div class="text-[18px] font-medium leading-none">Librería del Búho</div>
+          <div class="mono text-[10px] uppercase tracking-[0.18em] text-muted-2 mt-1">
+            Barranquilla · desde Colombia
+          </div>
+        </div>
+      </div>
+      <p class="text-[14px] max-w-sm leading-[1.6] text-muted">
+        Una librería pequeña con muchos clásicos. Pedidos por WhatsApp,
+        entregas en Barranquilla y alrededores.
+      </p>
+
+      <div class="flex items-center gap-3 mt-6">
+        <a
+          href={media.instagramUrl}
+          target="_blank"
+          rel="noopener"
+          aria-label={`Instagram ${media.instagramHandle}`}
+          class="icon-btn"
+          data-testid="footer-ig"
+        >
+          <InstagramIcon width="16" height="16" strokeWidth="1.8" />
+        </a>
+        <a
+          href={`https://wa.me/${media.whatsapp}`}
+          target="_blank"
+          rel="noopener"
+          aria-label="WhatsApp"
+          class="icon-btn"
+          data-testid="footer-wa"
+        >
+          <WhatsAppIcon width="16" height="16" />
+        </a>
+      </div>
+    </div>
+
+    <div class="col-span-6 md:col-span-2">
+      <div class="label mb-3">Tienda</div>
+      <ul class="space-y-2 text-[14px]">
+        <li><a href="/catalog" class="hover:underline" data-testid="footer-catalog">Catálogo</a></li>
+        <li><a href="/catalog?sort=new" class="hover:underline">Novedades</a></li>
+        <li><a href="/catalog?offers=1" class="hover:underline">Económicos</a></li>
+        <li><a href="/cart" class="hover:underline">Mi pedido</a></li>
+      </ul>
+    </div>
+
+    <div class="col-span-6 md:col-span-2">
+      <div class="label mb-3">Géneros</div>
+      <ul class="space-y-2 text-[14px]">
+        <li><a href="/catalog?genre=Ficci%C3%B3n%20cl%C3%A1sica" class="hover:underline">Clásicos</a></li>
+        <li><a href="/catalog?genre=Filosof%C3%ADa" class="hover:underline">Filosofía</a></li>
+        <li><a href="/catalog?genre=Literatura%20colombiana" class="hover:underline">Colombiana</a></li>
+        <li><a href="/catalog?genre=Teatro" class="hover:underline">Teatro</a></li>
+        <li><a href="/catalog?genre=Infantil" class="hover:underline">Infantil</a></li>
+      </ul>
+    </div>
+
+    <div class="col-span-12 md:col-span-3">
+      <div class="label mb-3">Contacto</div>
+      <ul class="space-y-2 text-[14px]">
+        <li>
+          <a
+            href={`https://wa.me/${media.whatsapp}`}
+            target="_blank"
+            rel="noopener"
+            class="hover:underline inline-flex items-center gap-1.5"
+          >
+            <WhatsAppIcon width="12" height="12" />
+            Pedidos por WhatsApp
+          </a>
+        </li>
+        <li>
+          <a href={media.instagramUrl} target="_blank" rel="noopener" class="hover:underline">
+            {media. instagramHandle} en Instagram
+          </a>
+        </li>
+        <li class="text-muted">
+          Entregas: Barranquilla y zonas aledañas
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-line">
+    <div class="mx-auto max-w-360 px-6 py-5 flex flex-wrap items-center justify-between gap-3">
+      <div class="mono text-[11px] uppercase tracking-[0.14em] text-muted-2">
+        © {media.year} Librería del Búho — Barranquilla, Colombia
+      </div>
+      <div class="mono text-[11px] uppercase tracking-[0.14em] text-muted-2">
+        Una librería pequeña con muchos clásicos
+      </div>
+    </div>
+  </div>
+</footer>

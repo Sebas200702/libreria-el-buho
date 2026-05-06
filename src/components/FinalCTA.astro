@@ -1,0 +1,44 @@
+---
+import { media } from '@/config/media'
+import InstagramIcon from './icons/InstagramIcon.astro'
+import WhatsAppIcon from './icons/WhatsAppIcon.astro'
+
+---
+
+<section class="border-t border-line" data-testid="final-cta">
+  <div class="mx-auto max-w-360 px-6 py-20 grid md:grid-cols-12 gap-6 items-center">
+    <div class="md:col-span-8">
+      <div class="label mb-3">07 — Hablemos</div>
+      <h2 class="text-[32px] md:text-[48px] tracking-tight leading-[1.02] max-w-xl">
+        Si no encuentras un libro,<br />
+        <span class="text-muted">pregúntanos.</span>
+      </h2>
+      <p class="text-[14px] text-muted max-w-md mt-4">
+        No todo está en la web. A veces conseguimos ediciones por encargo.
+        Escríbenos por WhatsApp o por Instagram.
+      </p>
+    </div>
+    <div class="md:col-span-4 flex flex-col gap-3">
+      <a
+        href={`https://wa.me/${media.whatsapp}?text=${encodeURIComponent('Hola 🦉 Librería del Búho, busco un libro…')}`}
+        target="_blank"
+        rel="noopener"
+        class="btn btn-primary justify-center"
+        data-testid="cta-wa"
+      >
+        <WhatsAppIcon width="14" height="14" />
+        Escribir por WhatsApp
+      </a>
+      <a
+        href={media.instagramUrl}
+        target="_blank"
+        rel="noopener"
+        class="btn btn-ghost justify-center"
+        data-testid="cta-ig"
+      >
+        <InstagramIcon width="14" height="14" strokeWidth="1.8" />
+        Seguir en Instagram · {media.instagramHandle}
+      </a>
+    </div>
+  </div>
+</section>

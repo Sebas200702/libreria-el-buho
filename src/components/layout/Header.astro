@@ -1,0 +1,84 @@
+---
+import SearchIcon from '@/components/icons/SearchIcon.astro'
+import WhatsAppIcon from '@/components/icons/WhatsAppIcon.astro'
+import { CartButton } from '@/components/shop/CartButton'
+
+interface Props {
+	cartCount?: number
+}
+const { cartCount = 0 } = Astro.props
+const path = new URL(Astro.request.url).pathname
+
+const nav = [
+	{ href: '/', label: 'Inicio' },
+	{ href: '/catalog', label: 'Catálogo' },
+	{ href: '/catalog?sort=new', label: 'Novedades' },
+	{ href: '/catalog?genre=Filosof%C3%ADa', label: 'Filosofía' },
+	{ href: '/catalog?genre=Literatura%20colombiana', label: 'Colombiana' },
+]
+---
+
+<header
+  class="sticky top-0 z-40 border-b border-line bg-paper/85 backdrop-blur"
+  data-testid="site-header"
+>
+  <div class="mx-auto flex max-w-360 items-center justify-between gap-6 px-5 md:px-6 py-3">
+    <a href="/" class="flex items-center gap-2.5" data-testid="logo-link">
+      <img
+        src="/logo-owl.png"
+        alt="Librería del Búho"
+        width="38"
+        height="38"
+        class="w-9.5 h-9.5 rounded-full border border-line-2 bg-white object-contain p-0.75"
+        loading="eager"
+      />
+      <div class="leading-[1.05]">
+        <div class="text-[15px] font-medium tracking-tight">Librería del Búho</div>
+        <div class="mono text-[9px] uppercase tracking-[0.18em] text-muted-2">
+          Barranquilla · por WhatsApp
+        </div>
+      </div>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-1" aria-label="Principal">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'px-3 py-2 text-[13px] rounded-[10px] transition-colors',
+              path === item.href
+                ? 'bg-ink text-paper'
+                : 'text-ink hover:bg-paper-3',
+            ]}
+            data-testid={`nav-${item.label.toLowerCase()}`}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a
+        href="/catalog"
+        class="icon-btn"
+        aria-label="Buscar"
+        data-testid="search-btn"
+      >
+        <SearchIcon width="16" height="16" strokeWidth="2" />
+      </a>
+      <a
+        href="https://wa.me/573000000000"
+        target="_blank"
+        rel="noopener"
+        class="icon-btn hidden sm:inline-flex"
+        aria-label="WhatsApp"
+        data-testid="header-whatsapp"
+      >
+        <WhatsAppIcon width="16" height="16" />
+      </a>
+      <CartButton client:load initialCount={cartCount} />
+    </div>
+  </div>
+</header>

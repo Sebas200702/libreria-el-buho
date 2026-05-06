@@ -1,0 +1,150 @@
+---
+import FinalCTA from '@/components/FinalCTA.astro'
+import Genres from '@/components/Genres.astro'
+import Hero from '@/components/Hero.astro'
+import HowItWorks from '@/components/HowItWorks.astro'
+import ProductCard from '@/components/shop/ProductCard.astro'
+import ProductSlider from '@/components/shop/ProductSlider.astro'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getServerSupabase } from '@/lib/supabase/server'
+import { formatPrice } from '@/lib/utils/format'
+
+const supabase = getServerSupabase({
+	request: Astro.request,
+	cookies: Astro.cookies,
+})
+
+const { data: featured } = await supabase
+	.from('books')
+	.select(
+		'id, slug, title, author, price, stock, genre, release_year, cover_image_path',
+	)
+	.eq('published', true)
+	.order('created_at', { ascending: false })
+	.limit(8)
+
+const { data: novelties } = await supabase
+	.from('books')
+	.select(
+		'id, slug, title, author, price, stock, genre, release_year, cover_image_path',
+	)
+	.eq('published', true)
+	.order('created_at', { ascending: false })
+	.range(8, 24)
+
+const { data: economics } = await supabase
+	.from('books')
+	.select(
+		'id, slug, title, author, price, stock, genre, release_year, cover_image_path',
+	)
+	.eq('published', true)
+	.lte('price', 15000)
+	.order('price', { ascending: true })
+	.limit(8)
+
+const { data: colombianos } = await supabase
+	.from('books')
+	.select(
+		'id, slug, title, author, price, stock, genre, release_year, cover_image_path',
+	)
+	.eq('published', true)
+	.eq('genre', 'Literatura colombiana')
+	.limit(8)
+
+const { data: genresRaw } = await supabase
+	.from('books')
+	.select('genre, price')
+	.eq('published', true)
+	.not('genre', 'is', null)
+
+const genreCounts = new Map<string, number>()
+;(genresRaw ?? []).forEach((row) => {
+	const g = (row as { genre: string | null }).genre
+	if (!g) return
+	genreCounts.set(g, (genreCounts.get(g) ?? 0) + 1)
+})
+const genres = [...genreCounts.entries()]
+	.sort((a, b) => b[1] - a[1])
+	.slice(0, 8)
+const totalBooks = (genresRaw ?? []).length
+const minPrice = Math.min(
+	...(genresRaw ?? []).map((r) => Number((r as { price: number }).price)),
+)
+const maxPrice = Math.max(
+	...(genresRaw ?? []).map((r) => Number((r as { price: number }).price)),
+)
+---
+
+<BaseLayout
+  title="Librería del Búho — Clásicos en Barranquilla por WhatsApp"
+  description="Una librería pequeña con muchos clásicos. Literatura, filosofía y libros colombianos. Pedidos por WhatsApp, entregas en Barranquilla y alrededores."
+>
+  <!-- HERO — humilde, real -->
+  <Hero totalBooks={totalBooks} minPrice={minPrice} maxPrice={maxPrice} />
+
+  <!-- DESTACADOS -->
+  <section class="mx-auto max-w-360 px-6 py-16" data-testid="featured">
+    <div class="flex items-end justify-between mb-8 gap-4 flex-wrap">
+      <div>
+        <div class="label mb-2">01 — Destacados</div>
+        <h2 class="text-[32px] md:text-[42px] tracking-tight">Para empezar</h2>
+      </div>
+      <a href="/catalog" class="btn btn-ghost">Ver los {totalBooks} títulos →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {(featured ?? []).slice(0, 8).map((b, i) => <ProductCard book={b} index={i} />)}
+      {
+        (featured ?? []).length === 0 && (
+          <div class="col-span-full card p-10 text-center mono text-[12px] uppercase tracking-[0.14em] text-muted">
+            Catálogo cargando…
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- COLOMBIANA -->
+  <div class="hairline">
+    <ProductSlider
+      eyebrow="02 — Literatura colombiana"
+      title="Desde casa"
+      books={colombianos ?? []}
+      moreHref="/catalog?genre=Literatura%20colombiana"
+    />
+  </div>
+
+  <!-- NOVEDADES -->
+  <div class="hairline border-t">
+    <ProductSlider
+      eyebrow="03 — Más del catálogo"
+      title="Sigue explorando"
+      books={novelties ?? []}
+      moreHref="/catalog"
+    />
+  </div>
+
+  <!-- GÉNEROS -->
+  <Genres genres={genres} />
+
+  <!-- ECONÓMICOS -->
+  <section class="mx-auto max-w-360 px-6 py-16 border-t border-line" data-testid="economics">
+    <div class="flex items-end justify-between mb-8 gap-4 flex-wrap">
+      <div>
+        <div class="label mb-2">05 — Económicos</div>
+        <h2 class="text-[32px] md:text-[42px] tracking-tight">
+          Hasta {formatPrice(15000)}
+        </h2>
+      </div>
+      <a href="/catalog?offers=1" class="btn btn-ghost">Ver todos los económicos →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {(economics ?? []).map((b, i) => <ProductCard book={b} index={i} />)}
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <HowItWorks />
+
+  <!-- CTA FINAL -->
+  <FinalCTA />
+</BaseLayout>
