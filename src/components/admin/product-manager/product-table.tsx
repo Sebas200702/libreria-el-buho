@@ -48,8 +48,9 @@ export const ProductTable = ({
 				</button>
 			</div>
 
-			<div className="card overflow-hidden">
-				<table className="w-full text-[13px]">
+				<div className="card">
+					<div className="overflow-x-auto">
+						<table className="w-full min-w-[720px] text-[13px]">
 					<thead className="mono text-[10px] uppercase tracking-[0.14em] text-muted-2 text-left">
 						<tr className="border-b border-line">
 							<th className="px-4 py-2.5">Portada</th>
@@ -84,6 +85,7 @@ export const ProductTable = ({
 						)}
 					</tbody>
 				</table>
+					</div>
 			</div>
 		</>
 	)
