@@ -27,8 +27,9 @@ export const OrderTable = ({ initialOrders }: OrderTableProps) => {
 				</div>
 			)}
 
-			<div className="card overflow-hidden">
-				<table className="w-full text-[13px]">
+			<div className="card">
+				<div className="overflow-x-auto">
+					<table className="w-full min-w-[640px] text-[13px]">
 					<thead className="mono text-[10px] uppercase tracking-[0.14em] text-muted-2 text-left">
 						<tr className="border-b border-line">
 							<th className="px-5 py-2.5 w-10"></th>
@@ -64,6 +65,7 @@ export const OrderTable = ({ initialOrders }: OrderTableProps) => {
 					</tbody>
 				</table>
 			</div>
+						</div>
 		</div>
 	)
 }
