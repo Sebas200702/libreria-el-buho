@@ -85,11 +85,15 @@ export const useProductForm = (
 						.update(payload)
 						.eq('id', initial.id)
 						.select('*')
-						.single()
-				: await supabase.from('books').insert(payload).select('*').single()
+						.maybeSingle()
+				: await supabase.from('books').insert(payload).select('*').maybeSingle()
 		setSaving(false)
 		if (result.error) {
 			setError(result.error.message)
+			return
+		}
+		if (!result.data) {
+			setError('No se pudo guardar el libro. Verifica las políticas RLS.')
 			return
 		}
 		onSaved(result.data as Book)

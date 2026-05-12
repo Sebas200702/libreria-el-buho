@@ -719,37 +719,16 @@ async function wipeOldBooks() {
 }
 
 async function ensureAdmin() {
-	const email = 'admin@buhobooks.co'
-	const password = 'BuhoBooks2026!'
-	console.log('→ Ensuring admin user…')
-	const { data: existing } = await supabase.auth.admin.listUsers({
-		page: 1,
-		perPage: 200,
-	})
-	const found = existing?.users.find((u) => u.email === email)
-	if (found) {
-		console.log(`  ✓ admin exists: ${email}`)
-		return { email, password: '(existing)' }
-	}
-	const { error } = await supabase.auth.admin.createUser({
-		email,
-		password,
-		email_confirm: true,
-	})
-	if (error) {
-		console.error('  ✗ create admin failed:', error.message)
-		return null
-	}
-	console.log(`  ✓ admin created: ${email}`)
-	return { email, password }
+	console.log('→ Note: Users must be created in Supabase Auth dashboard.')
+	console.log('  Any authenticated user can access /admin (via middleware protection).')
+	return null
 }
 
 async function main() {
 	await wipeOldBooks()
 	await seedBooks()
-	const creds = await ensureAdmin()
+	await ensureAdmin()
 	console.log('\n✔ Seed complete.')
-	if (creds) console.log(`Admin login → ${creds.email} / ${creds.password}`)
 }
 
 main().catch((e) => {
