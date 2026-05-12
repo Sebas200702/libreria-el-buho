@@ -100,7 +100,7 @@ const kpis = [
     <!-- Recent orders + low stock -->
     <div class="grid grid-cols-12 gap-4 mt-10">
       <div class="col-span-12 lg:col-span-7">
-        <div class="card overflow-hidden">
+        <div class="card">
           <div class="flex items-center justify-between p-5 border-b border-line">
             <div>
               <div class="label"> Pedidos recientes</div>
@@ -108,7 +108,8 @@ const kpis = [
             </div>
             <a href="/admin/orders" class="btn btn-ghost">Ver todos →</a>
           </div>
-          <table class="w-full text-[13px]">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[640px] text-[13px]">
             <thead class="text-left mono text-[10px] uppercase tracking-[0.14em] text-muted-2">
               <tr class="border-b border-line">
                 <th class="px-5 py-2.5">Cliente</th>
