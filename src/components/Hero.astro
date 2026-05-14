@@ -19,54 +19,93 @@ const { totalBooks, minPrice, maxPrice } = Astro.props
 
     <div class="relative mx-auto max-w-360 px-6 pt-14 pb-14 md:pt-20 md:pb-20">
       <div class="grid grid-cols-12 gap-8 items-center">
-        <div class="col-span-12 md:col-span-7">
-          <div class="flex items-center gap-3 mb-7 flex-wrap fade-up">
-            <span class="chip" data-testid="hero-chip">
-              <span class="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
-              Barranquilla · Colombia
-            </span>
-            <span class="chip">
-              <WhatsAppIcon width="10" height="10" />
-              Pedidos por WhatsApp
-            </span>
-            <span class="mono text-[11px] uppercase tracking-[0.14em] text-muted-2">
-              {totalBooks} títulos disponibles
-            </span>
-          </div>
-
-          <h1
-            class="fade-up text-[40px] md:text-[72px] leading-[0.98] tracking-[-0.03em]"
-            style="animation-delay: 80ms"
-          >
-            Una librería pequeña<br />
-            <span class="text-muted">con muchos</span><br />
-            clásicos.
-          </h1>
-
-          <p
-            class="fade-up mt-7 max-w-xl text-[15px] md:text-[16px] leading-[1.6] text-muted"
-            style="animation-delay: 160ms"
-          >
-            Literatura universal, filosofía y libros colombianos, a precios
-            honestos. Mira el catálogo, arma tu pedido y lo cerramos por WhatsApp.
-            Entregas en Barranquilla y alrededores.
-          </p>
-
-          <div class="fade-up mt-8 flex flex-wrap items-center gap-3" style="animation-delay: 240ms">
-            <a href="/catalog" class="btn btn-primary" data-testid="hero-cta-primary">
-              Ver catálogo
-              <ArrowRightIcon width="14" height="14" />
-            </a>
-            <a
-              href={`https://wa.me/${media.whatsapp}?text=${encodeURIComponent('Hola 🦉, vi la web de la Librería del Búho y quiero preguntar por algunos libros.')}`}
-              target="_blank"
-              rel="noopener"
-              class="btn btn-ghost inline-flex items-center gap-2"
-              data-testid="hero-cta-wa"
+         
+          <div class="col-span-12 flex flex-row md:items-center gap-10">
+            <header class="col-span-8 w-full">
+              <h1
+          
+              class="fade-up text-[40px] md:text-[72px] leading-[0.98] md:w-full w-[70%] tracking-[-0.03em]"
+              style="animation-delay: 80ms"
             >
-              <WhatsAppIcon width="14" height="14" class="text-success" />
-              Escribir por WhatsApp
-            </a>
+              Una librería pequeña<br />
+              <span class="text-muted">con muchos</span><br />
+              clásicos.
+            </h1>
+            <div class="flex items-center gap-3 my-7 flex-wrap fade-up">
+              <span class="chip" data-testid="hero-chip">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
+                Barranquilla · Colombia
+              </span>
+              <span class="chip">
+                <WhatsAppIcon width="10" height="10" />
+                Pedidos por WhatsApp
+              </span>
+              <span class="mono text-[11px] uppercase tracking-[0.14em] text-muted-2">
+                {totalBooks} títulos disponibles
+              </span>
+            </div>
+
+
+            <p
+              class="fade-up mt-7 max-w-xl text-[15px] md:text-[16px] leading-[1.6] text-muted"
+              style="animation-delay: 160ms"
+            >
+              Una libreria para los barranquilleros, con tus libros favoritos. <br />
+              <strong class="text-primary">Escribenos</strong>
+            </p>
+
+            <div class="fade-up mt-8 flex flex-wrap items-center md:gap-3 md:text-md text-xs" style="animation-delay: 240ms">
+              <a href="/catalog" class="btn btn-primary" data-testid="hero-cta-primary">
+                Ver catálogo
+                <ArrowRightIcon width="14" height="14" />
+              </a>
+              <a
+                href={`https://wa.me/${media.whatsapp}?text=${encodeURIComponent('Hola 🦉, vi la web de la Librería del Búho y quiero preguntar por algunos libros.')}`}
+                target="_blank"
+                rel="noopener"
+                class="btn btn-ghost inline-flex items-center gap-2 "
+                data-testid="hero-cta-wa"
+              >
+                <WhatsAppIcon width="14" height="14" class="text-success" />
+                Escribir por WhatsApp
+              </a>
+
+              </div>
+
+            </header>
+        
+            
+        
+              <div class="md:col-span-4 fade-up md:w-full absolute md:static w-32 right-6" style="animation-delay: 120ms">
+                <div class="relative mx-auto max-w-95">
+                  <div class="absolute -inset-4 border border-dashed border-line-2 rounded-full -z-10"></div>
+                  <div class="absolute -inset-10 border border-dashed border-line-2 rounded-full -z-10 opacity-60"></div>
+                  <div class="aspect-square rounded-full border-2 border-ink bg-white overflow-hidden relative">
+                    <img
+                      src="/logo-owl.png"
+                      alt="Mascota Librería del Búho"
+                      class="absolute inset-0 w-full h-full object-contain p-2"
+                      loading="eager"
+                    />
+                  </div>
+                  <!-- floating annotations -->
+                  <div class="absolute -top-2 -right-6 rotate-3 chip bg-paper-2">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-signal md:text-md text-xs"></span>
+                    Abierto en línea
+                  </div>
+                  <div class="absolute -bottom-3 -left-4 -rotate-2 chip bg-paper-2 md:text-md text-xs">
+                    <MapPinIcon width="10" height="10" />
+                    Barranquilla
+                  </div>
+                </div>
+              </div>
+            
+          
+            </div>
+
+          
+          
+         
           </div>
 
           <!-- Real facts, no invented bullshit -->
@@ -87,30 +126,7 @@ const { totalBooks, minPrice, maxPrice } = Astro.props
         </div>
 
         <!-- LOGO MASCOT -->
-        <div class="col-span-12 md:col-span-5 fade-up" style="animation-delay: 120ms">
-          <div class="relative mx-auto max-w-95">
-            <div class="absolute -inset-4 border border-dashed border-line-2 rounded-full -z-10"></div>
-            <div class="absolute -inset-10 border border-dashed border-line-2 rounded-full -z-10 opacity-60"></div>
-            <div class="aspect-square rounded-full border-2 border-ink bg-white overflow-hidden relative">
-              <img
-                src="/logo-owl.png"
-                alt="Mascota Librería del Búho"
-                class="absolute inset-0 w-full h-full object-contain p-2"
-                loading="eager"
-              />
-            </div>
-            <!-- floating annotations -->
-            <div class="absolute -top-2 -right-6 rotate-3 chip bg-paper-2">
-              <span class="inline-block w-1.5 h-1.5 rounded-full bg-signal"></span>
-              Abierto en línea
-            </div>
-            <div class="absolute -bottom-3 -left-4 -rotate-2 chip bg-paper-2">
-              <MapPinIcon width="10" height="10" />
-              Barranquilla
-            </div>
-          </div>
-        </div>
-      </div>
+        
 
       <!-- Ticker honesto -->
       <div class="fade-up mt-16 overflow-hidden border-y border-line py-3" style="animation-delay: 360ms">
@@ -126,6 +142,6 @@ const { totalBooks, minPrice, maxPrice } = Astro.props
             ])
           }
         </div>
-      </div>
+     
     </div>
   </section>
