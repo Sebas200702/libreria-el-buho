@@ -1,13 +1,13 @@
 ---
 import { LogoutButton } from '@/components/admin/LogoutButton'
 import ExternalLinkIcon from '@/components/icons/ExternalLinkIcon.astro'
-
+import {media } from '@/config/media'
 interface Props {
 	current?: string
 	userEmail?: string | null
 }
 const { current = '', userEmail = null } = Astro.props
-const logoUrl = import.meta.env.PUBLIC_LOGO_URL
+
 
 const items = [
 	{
@@ -38,7 +38,7 @@ const items = [
   <div class="px-5 py-5 border-b border-line">
     <a href="/" class="flex items-center gap-2.5">
       <img
-        src={logoUrl}
+        src={media.logoUrl}
         alt="Librería del Búho"
         width="32"
         height="32"
@@ -96,7 +96,7 @@ const items = [
 <div class="md:hidden fixed top-0 left-0 right-0 h-14 bg-paper-2 border-b border-line z-30 flex items-center justify-between px-4">
   <a href="/admin" class="flex items-center gap-2">
     <img
-      src={logoUrl}
+      src={media.logoUrl}
       alt="Librería del Búho"
       width="24"
       height="24"
